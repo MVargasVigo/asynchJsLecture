@@ -85,25 +85,44 @@ const whereAmI = function (lat, lng) {
     `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}`
   )
     .then(response => {
-      console.log(response); //This will help us see information on the response, like the ok property. If it is false we can throw an error like this:
-      if (!response.ok)
-        throw new Error(`Problem with geocoding ${response.status}`);
+      console.log(response);
+      if (!response.ok) throw new Error(`Geocoding failed! ${response.status}`);
       return response.json();
     })
     .then(data => {
       console.log(data);
-      console.log(`You are in ${data.city}, ${data.countryName}`);
+      console.log(
+        `You are in ${data.city}, ${data.countryName}, in the beautiful continent of ${data.continent}`
+      );
       return fetch(`https://restcountries.com/v2/name/${data.countryName}`);
     })
     .then(response => {
-      if (!response) throw new Error(`Country not found (${response.status})`);
+      console.log(response);
+      if (!response.ok)
+        throw new Error(`Country not found! ${response.status}`);
       return response.json();
     })
-    .then(data => renderCountry(data[0]))
+    .then(data => {
+      console.log(data);
+      renderCountry(data[0]);
+    })
     .catch(err => console.log(`Something went wrong! ${err.message}`))
-    .finally(() => {
-      countriesContainer.style.opacity = 1;
-    });
+    .finally(() => (countriesContainer.style.opacity = 1));
 };
 
 whereAmI(52.508, 13.381);
+
+const createImage = function (imgPath) {
+  return new Promise(function (resolve, reject) {
+    const imageRender = function () {
+      const image = document.createElement('img');
+      image.src = imgPath;
+      const imagesContainer = document.querySelector('.images');
+      imagesContainer.appendChild(image);
+    };
+    resolve(imageRender);
+    reject(new Error('Could not load the image!'));
+  });
+};
+
+createImage.then(response => console.log(response));
